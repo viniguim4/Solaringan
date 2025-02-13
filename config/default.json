@@ -1,0 +1,32 @@
+{
+    "rpc" : {
+        "endpoint": "https://api.mainnet-beta.solana.com"
+    },
+    "grpc": {
+        "endpoint": "https://solana-yellowstone-grpc.publicnode.com",
+        "x_token" : "0"
+    },
+    "wallets": {
+        "targets": [
+            "",
+            "",
+            ""
+        ],
+        "copier": {
+            "private_key": ""
+        }
+    },
+    "trade_settings": {
+        "min_entry" : 0.1,
+        "max_entry" : 1,
+        "slippage_tolerance": 1.0
+    },
+    "dex": {
+        "raydium": {
+            "program_id": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
+        },
+        "pumpfun" : {
+            "program_id": "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
+        }
+    }
+}
