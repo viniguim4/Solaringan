@@ -39,6 +39,6 @@ async fn main() -> Result<()> {
     loop {
         tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
     }
-    
-    Ok(())
+
 }
+

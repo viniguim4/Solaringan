@@ -68,7 +68,7 @@ impl Config {
         Ok(config)
     }
 
-    pub async fn connect_grpc(&self) -> Result<GeyserGrpcClient<impl Interceptor>> {
+    async fn connect_grpc(&self) -> Result<GeyserGrpcClient<impl Interceptor>> {
         let url  = self.get_grpc_url();
         println!("Connecting to {}", url);
         let client = GeyserGrpcClient::build_from_shared(url).expect("Failed to build GeyserGrpcClient")
@@ -109,7 +109,7 @@ impl Config {
         Ok(request)
     }
 
-    pub async fn subscribe(&self, client: &mut GeyserGrpcClient<impl Interceptor>, selector: u8) -> Result<(
+    async fn subscribe(&self, client: &mut GeyserGrpcClient<impl Interceptor>, selector: u8) -> Result<(
         impl Sink<SubscribeRequest, Error = mpsc::SendError>,
         impl Stream<Item = Result<SubscribeUpdate, Status>>,
     )> {
@@ -138,3 +138,4 @@ impl Config {
         self.grpc.endpoint.clone()
     }
 }
+
