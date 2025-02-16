@@ -37,6 +37,7 @@ pub fn decode_pumpfun_txn(tx: &TransactionWithStatusMeta) -> Result<Value> {
         decodedIxs.push(PumpfunParser::parse_instruction(&ix)?);
     }
 
+    let pumpType = PumpType::get_type(&decodedIxs.clone())?;
     info!("PUMP DECODED {:#?}", decodedIxs);
 
     Ok(json!({}))

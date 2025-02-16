@@ -120,3 +120,35 @@ impl RaydiumType {
         }
     }
 }
+
+#[derive(Debug)]
+pub enum PumpType {
+    Buy(TradeSizeWithVirtual),
+    Sell(TradeSizeWithVirtual),
+}
+
+#[derive(Debug)]
+pub struct TradeSizeWithVirtual {
+    reserve_in_virtual: u64,
+    reserve_out_virtual: u64,
+    reserve_in: u64,
+    reserve_out: u64,
+    amount_in: u64,
+    amount_out : u64,
+    price_impact: f64
+}
+
+impl PumpType {
+// TODO unfineshed
+    pub fn get_type(ixs : &Vec<PumpfunInstruction>) -> PumpType {
+        let decodedBuySells = vec![];
+        let decodedCpi = vec![];
+        for ix in ixs {
+            match ix {
+                PumpfunInstruction::Buy => decodedBuySells.push(ix),
+                PumpfunInstruction::Sell => decodedBuySells.push(ix),
+                PumpfunInstruction::Cpi => decodedCpi.push(ix),
+            }
+        }
+    }
+}
