@@ -1,13 +1,13 @@
 use log::{info};
 use tokio::time::{sleep, Duration};
 use anyhow::{Result, Context};
-use serde_json::{Value, json};
 use futures::StreamExt;
 use solana_sdk::signature::Signature;
-use solana_transaction_status::UiTransactionEncoding;
+use solana_transaction_status::TransactionWithStatusMeta;
 use yellowstone_grpc_proto::prelude::{subscribe_update::UpdateOneof, SubscribeUpdateTransactionInfo};
 use yellowstone_grpc_proto::convert_from;
 use crate::config::Config;
+use crate::parser::{decode_pumpfun_txn, decode_raydium_txn};
 
 pub async fn start_monitor_loop(config: Config, selector: u8) -> Result<()> {
     // Spawn the monitoring task
@@ -68,10 +68,18 @@ async fn monitor_wallet(config: &Config, selector: u8) -> Result<()> {
                         };
                         let pretty_tx = create_pretty_transaction(transaction)?;
                         match selector {
-                            0 => info!("RAYDIUM Transaction at slot {}: {}", slot, serde_json::to_string_pretty(&pretty_tx)?),
-                            1 => info!("PUMPFUN Transaction at slot {}: {}", slot, serde_json::to_string_pretty(&pretty_tx)?),
+                            0 => {
+                                info!("RAYDIUM Transaction at slot {}: {:#?}", slot, &pretty_tx);
+                                let _decoded_tx = decode_raydium_txn(&pretty_tx.tx)?;
+                                
+                            },
+                            1 => {
+                                info!("PUMPFUN Transaction at slot {}: {:#?}", slot, &pretty_tx);
+                                let _decoded_tx = decode_pumpfun_txn(&pretty_tx.tx)?;
+                                
+                            },
                             _ => {
-                                info!("Not supposed to get here ")
+                                info!("Not supposed to get here ");
                             }
                         }
                     }
@@ -102,15 +110,20 @@ async fn monitor_wallet(config: &Config, selector: u8) -> Result<()> {
 }
 
 
-fn create_pretty_transaction(tx: SubscribeUpdateTransactionInfo) -> Result<Value> {
-    Ok(json!({
-        "signature": Signature::try_from(tx.signature.as_slice()).context("invalid signature")?.to_string(),
-        "isVote": tx.is_vote,
-        "tx": convert_from::create_tx_with_meta(tx)
+fn create_pretty_transaction(tx: SubscribeUpdateTransactionInfo) -> Result<PrettyTransaction> {
+    Ok(PrettyTransaction {
+        signature: Signature::try_from(tx.signature.as_slice()).context("invalid signature")?.to_string(),
+        is_vote: tx.is_vote,
+        tx: convert_from::create_tx_with_meta(tx)
             .map_err(|error| anyhow::anyhow!(error))
             .context("invalid tx with meta")?
-            .encode(UiTransactionEncoding::Base64, Some(u8::MAX), true)
-            .context("failed to encode transaction")?,
-    }))
+    })
+}
+
+#[derive(Debug)]
+pub struct PrettyTransaction {
+    signature: String,
+    is_vote: bool,
+    tx: TransactionWithStatusMeta
 }
 

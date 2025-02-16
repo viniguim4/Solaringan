@@ -1,7 +1,11 @@
 mod config;
-mod monitor;
-mod trader;
 mod event_loops;
+mod parser;
+mod filter;
+mod utils { 
+    pub mod raydium_parser;
+    pub mod pumpfun_parser;
+}
 
 use anyhow::Result;
 use log::info;

@@ -19,3 +19,4 @@ yellowstone-grpc-client = "5.0.0"
 yellowstone-grpc-proto = "5.0.0"
 base64 = "0.22.1"
 maplit = "1.0.2"
+borsh = { version = "0.9.3" }
