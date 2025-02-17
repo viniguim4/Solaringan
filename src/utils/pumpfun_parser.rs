@@ -4,10 +4,10 @@ use anyhow::Result;
 
 pub const PUMPFUN_PROGRAM_ID: Pubkey = pubkey!("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P");
 
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Clone)]
 pub struct InitializeArgs {}
 
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Clone)]
 pub struct SetParamsArgs {
     pub fee_recipient: [u8; 32],
     pub initial_virtual_token_reserves: u64,
@@ -17,26 +17,26 @@ pub struct SetParamsArgs {
     pub fee_basis_points: u64,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Clone)]
 pub struct CreateArgs {
     pub name: String,
     pub symbol: String,
     pub uri: String,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Clone)]
 pub struct BuyArgs {
     pub amount: u64,
     pub max_sol_cost: u64,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Clone)]
 pub struct SellArgs {
     pub amount: u64,
     pub min_sol_output: u64,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Clone, Default)]
 pub struct CPILog {
     pub blob : u64,      //8
     pub mint_address: [u8; 32],  //32 
@@ -51,7 +51,7 @@ pub struct CPILog {
     pub real_token_reserves: u64,   //4
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum PumpfunInstruction {
     Initialize,
     SetParams(SetParamsArgs, Vec<AccountMeta>),

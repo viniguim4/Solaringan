@@ -1,5 +1,6 @@
 use solana_transaction_status::TransactionWithStatusMeta;
 use anyhow::Result;
+use crate::utils::pumpfun_parser::{PumpfunInstruction, CPILog};
 
 const RD_AUTHORITY : &'static str = "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1";
 const WSOL : &'static str = "So11111111111111111111111111111111111111112";
@@ -125,6 +126,7 @@ impl RaydiumType {
 pub enum PumpType {
     Buy(TradeSizeWithVirtual),
     Sell(TradeSizeWithVirtual),
+    Unknown
 }
 
 #[derive(Debug)]
@@ -140,15 +142,51 @@ pub struct TradeSizeWithVirtual {
 
 impl PumpType {
 // TODO unfineshed
-    pub fn get_type(ixs : &Vec<PumpfunInstruction>) -> PumpType {
-        let decodedBuySells = vec![];
-        let decodedCpi = vec![];
+    pub fn get_type(ixs : &Vec<PumpfunInstruction>) -> Result<Self> {
+        if ixs.len() != 2 {
+            return Ok(PumpType::Unknown);
+        }
+        let mut is_buy = false;
+        let mut decodedCpi = CPILog::default();
         for ix in ixs {
             match ix {
-                PumpfunInstruction::Buy => decodedBuySells.push(ix),
-                PumpfunInstruction::Sell => decodedBuySells.push(ix),
-                PumpfunInstruction::Cpi => decodedCpi.push(ix),
+                PumpfunInstruction::Buy(_, _) => {is_buy = true},
+                PumpfunInstruction::Sell(_, _) => {is_buy = false},
+                PumpfunInstruction::CPILog(inner, _) => decodedCpi = inner.clone(),
+                _ => return Ok(PumpType::Unknown)
             }
         }
+        if is_buy {
+            let reserve_in_virtual_before = decodedCpi.virtual_sol_reserves - decodedCpi.user_sol;
+            let price_impact_sqrt = decodedCpi.virtual_sol_reserves as f64/reserve_in_virtual_before as f64;
+            let price_impact = (price_impact_sqrt * price_impact_sqrt) - 1.0; 
+
+            let tradesizevirtual = TradeSizeWithVirtual{
+                reserve_in_virtual : decodedCpi.virtual_sol_reserves,
+                reserve_out_virtual : decodedCpi.virtual_token_reserves,
+                reserve_in : decodedCpi.real_sol_reserves,
+                reserve_out : decodedCpi.real_token_reserves,
+                amount_in : decodedCpi.user_sol,
+                amount_out : decodedCpi.user_token,
+                price_impact 
+            };
+
+            return Ok(PumpType::Buy(tradesizevirtual));
+        } else {
+            let reserve_in_virtual_before = decodedCpi.virtual_token_reserves - decodedCpi.user_token;
+            let price_impact_sqrt = reserve_in_virtual_before as f64/decodedCpi.virtual_token_reserves as f64;
+            let price_impact = 1.0 - (price_impact_sqrt * price_impact_sqrt);
+            let tradesizevirtual = TradeSizeWithVirtual{
+                reserve_in_virtual : decodedCpi.virtual_token_reserves,
+                reserve_out_virtual : decodedCpi.virtual_sol_reserves,
+                reserve_in : decodedCpi.real_token_reserves,
+                reserve_out : decodedCpi.real_sol_reserves,
+                amount_in : decodedCpi.user_token,
+                amount_out : decodedCpi.user_sol,
+                price_impact 
+            };
+
+            return Ok(PumpType::Sell(tradesizevirtual));
+        }        
     }
 }

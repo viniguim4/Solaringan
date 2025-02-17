@@ -2,10 +2,9 @@ use serde_json::{Value, json};
 use log::{info};
 use solana_transaction_status::TransactionWithStatusMeta;
 use anyhow::{Result};
-use solana_sdk::{message::v0::LoadedAddresses, pubkey::Pubkey, instruction::{Instruction, AccountMeta, CompiledInstruction}};
-use crate::utils::raydium_parser::*;
-use crate::utils::pumpfun_parser::*;
-use crate::filter::RaydiumType;
+use solana_sdk::{message::v0::LoadedAddresses, instruction::{Instruction, AccountMeta, CompiledInstruction}};
+use crate::utils::{raydium_parser::*, pumpfun_parser::*};
+use crate::filter::{RaydiumType, PumpType};
 
 pub fn decode_raydium_txn(tx: &TransactionWithStatusMeta) -> Result<Value> {
     let allIxs = flatten_transaction_response(&tx.clone())?;
@@ -38,7 +37,7 @@ pub fn decode_pumpfun_txn(tx: &TransactionWithStatusMeta) -> Result<Value> {
     }
 
     let pumpType = PumpType::get_type(&decodedIxs.clone())?;
-    info!("PUMP DECODED {:#?}", decodedIxs);
+    info!("PUMP DECODED {:#?}", pumpType);
 
     Ok(json!({}))
 }
